@@ -38,10 +38,9 @@ h1 {
  */
 
 .deck {
-    width: 660px;
-    min-height: 680px;
+    width: 95vw;
     background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%);
-    padding: 32px;
+    padding: 15px;
     border-radius: 10px;
     box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.5);
     display: flex;
@@ -52,8 +51,9 @@ h1 {
 }
 
 .deck .card {
-    height: 125px;
-    width: 125px;
+    height: calc((95vw - 70px)/4);
+    width: calc((95vw - 70px)/4);
+    margin: 5px;
     background: #2e3d49;
     font-size: 0;
     color: #ffffff;
@@ -63,6 +63,31 @@ h1 {
     justify-content: center;
     align-items: center;
     box-shadow: 5px 2px 20px 0 rgba(46, 61, 73, 0.5);
+}
+
+@media screen and (min-width: 500px) {
+    .deck {
+        padding: 20px;
+    }
+
+    .deck .card {
+        height: calc((95vw - 120px)/4);
+        width: calc((95vw - 120px)/4);
+        margin: 10px;
+    }
+}
+
+@media screen and (min-width: 700px) {
+    .deck {
+        width: 660px;
+        min-height: 680px;
+        padding: 32px;
+    }
+
+    .deck .card {
+        height: 125px ;
+        width: 125px;
+    }
 }
 
 .deck .card.open {
@@ -87,7 +112,7 @@ h1 {
 
 .score-panel {
     text-align: left;
-    width: 345px;
+    width: 95vw;
     margin-bottom: 10px;
 }
 
