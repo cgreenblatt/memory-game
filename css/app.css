@@ -77,18 +77,6 @@ h1 {
     }
 }
 
-@media screen and (min-width: 700px) {
-    .deck {
-        width: 660px;
-        min-height: 680px;
-        padding: 32px;
-    }
-
-    .deck .card {
-        height: 125px ;
-        width: 125px;
-    }
-}
 
 .deck .card.open {
     transform: rotateY(0);
@@ -132,3 +120,21 @@ h1 {
     float: right;
     cursor: pointer;
 }
+
+@media screen and (min-width: 700px) {
+    .score-panel {
+        width: 660px;
+    }
+
+    .deck {
+        width: 660px;
+        min-height: 680px;
+        padding: 32px;
+    }
+
+    .deck .card {
+        height: 125px ;
+        width: 125px;
+    }
+}
+
