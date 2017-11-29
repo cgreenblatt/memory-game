@@ -39,17 +39,17 @@ function shuffle(array) {
 
 function restartGame() {
 
-    cards.removeAttr("style");
-    cards.removeClass("opened match")
+    cards.removeClass().addClass("card");
     let cardArray = shuffle(cards.toArray());
     deck.empty();
     deck.append(cardArray);
-    cards.click(openCard);
+    cards.click(clickHandler);
 }
 
-function openCard() {
+function clickHandler() {
 
-    if ((elementToMatch === this) || $( this ).hasClass("match")){
+    // ignore clicks on green (matched cards) and current blue card
+    if ((elementToMatch === this) || $( this ).hasClass("match")) {
         return;
     }
 
@@ -62,38 +62,23 @@ function openCard() {
     if (elementToMatch === undefined) {
         elementToMatch = this;  // initialize
         symbolToMatch = selectedSymbol;
-         /*  $( this ).css(
-            {"animation-name": "turn-face-up",
-             "animation-duration": ".5s",
-             "animation-fill-mode": "forwards"});*/
-             $( this ).addClass("turn-face-up");
+        $( this ).removeClass().addClass("card turn");
+
     } else {
         if (symbolToMatch === selectedSymbol) {
-            $( this ).css(
-            {"animation-name": "rotate-bounce",
-             "animation-duration": "1.0s",
-             "animation-fill-mode": "forwards"});
-             $(elementToMatch).css(
-                {"animation-name": "bounce",
-                "animation-duration": "1.0s",
-                "animation-fill-mode": "forwards"});
-             $( this ).toggleClass("match");
-             $( elementToMatch ).toggleClass("match");
-        } else {
-            const opened = $( this ).hasClass("opened");
-            if (!opened) {
-                $( this ).css(
-                {"animation-name": "new-selected-card1",
-                "animation-duration": "2.0s",
-                "animation-fill-mode": "forwards"});
-            } else {
-                $( this ).css({"animation-name": "new-selected-card2"});
-            }
-                            $( this ).toggleClass("opened");
-             $(elementToMatch).css(
-            {"animation-name": "card-to-match",
-             "animation-duration": "2.0s",
-             "animation-fill-mode": "forwards"});
+
+             $( this ).removeClass().addClass("card turn-distort match");
+
+             $( elementToMatch ).removeClass().addClass("card distort match");
+        } else {  // not a match
+
+            // turn card just clicked on, change to red, tilt, and turn face down
+            if ($( this ).hasClass("turn-tilt-turn1"))
+                $( this ).removeClass().addClass("card turn-tilt-turn2");
+            else
+                $( this ).removeClass().addClass("card turn-tilt-turn1");
+            // change to red, tilt, and turn face down
+            $( elementToMatch ).removeClass().addClass("card tilt-turn")
         }
              symbolToMatch = undefined;
              elementToMatch = undefined;
