@@ -33,6 +33,49 @@ h1 {
     font-weight: 300;
 }
 
+h6 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 75;
+    margin: 5px;
+}
+
+.win-overlay {
+    opacity: 0;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    top: 0;
+    right: 0;
+    z-index: -1;
+    background-color: #fff;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.check-mark {
+    color: #8bc34a9c;
+    border-color: #9e9e9e47;
+    border-width: 2px;
+    border-style: solid;
+    height: 60px;
+    width: 60px;
+    padding: 6px;
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 33px;
+}
+
+.button-color {
+    background-color: #02ccba;
+}
+
+.button {
+    display: block;
+}
+
 /*
  * Styles for the deck of cards
  */
@@ -203,10 +246,11 @@ h1 {
     text-align: left;
     width: 95vw;
     margin-bottom: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
 }
 
 .score-panel .stars {
-    margin: 0;
     padding: 0;
     display: inline-block;
     margin: 0 5px 0 0;
