@@ -1,11 +1,54 @@
 /*
  * Create a list that holds all of your cards
  */
- const cards = $(".card");
- const deck = $(".deck");
- const restart = $(".restart");
+ const cardsJQ = $(".card");
+ const deckJQ = $(".deck");
+ const restartJQ = $(".restart");
  let symbolToMatch = undefined;
  let elementToMatch = undefined;
+
+let Game = function(cardsJQ, deckJQ, clickHandler) {
+    this.moves = 0;
+    this.stars = 3;
+    this.cardsJQ = cardsJQ;
+    this.deckJQ = deckJQ;
+    this.clickHandler = clickHandler;
+
+
+    Game.prototype.shuffle = function(array) {
+
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
+    }
+
+}
+
+Game.prototype.addMove = function() {
+    this.moves++;
+}
+
+Game.prototype.subtractStar = function() {
+    this.stars--;
+}
+
+Game.prototype.startNewGame = function() {
+
+    this.cardsJQ.removeClass().addClass("card");
+    let cardArray = shuffle(cardsJQ.toArray());
+    this.deckJQ.empty();
+    this.deckJQ.append(cardArray);
+    this.cardsJQ.click(clickHandler);
+    this.moves = 0;
+    this.stars = 3;
+
+}
 
 
 
@@ -37,13 +80,15 @@ function shuffle(array) {
 }
 
 
-function restartGame() {
+function startNewGame() {
 
     cards.removeClass().addClass("card");
     let cardArray = shuffle(cards.toArray());
     deck.empty();
     deck.append(cardArray);
     cards.click(clickHandler);
+    this.moves = 0;
+    this.stars = 3;
 }
 
 function clickHandler() {
@@ -88,18 +133,12 @@ function clickHandler() {
 }
 
 
-restart.click(restartGame);
-restartGame();
+/* restart.click(startNewGame);
+startNewGame(); */
 
+const game = new Game(cardsJQ, deckJQ, clickHandler);
+game.startNewGame();
 
-
-/*
-console.log(cards);
-cards.toggleClass("match", false);
-cards.toggleClass("open", false);
-cards.toggleClass("show", false);
-console.log(cards)
-*/
 
 /*
  * set up the event listener for a card. If a card is clicked:
