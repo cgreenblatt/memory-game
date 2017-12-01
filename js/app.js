@@ -7,15 +7,9 @@
  let symbolToMatch = undefined;
  let elementToMatch = undefined;
 
-let Game = function(cardsJQ, deckJQ, clickHandler) {
-    this.moves = 0;
-    this.stars = 3;
-    this.cardsJQ = cardsJQ;
-    this.deckJQ = deckJQ;
-    this.clickHandler = clickHandler;
+    let Deck = function() {}
 
-
-    Game.prototype.shuffle = function(array) {
+    Deck.prototype.shuffle = function(array) {
 
     var currentIndex = array.length, temporaryValue, randomIndex;
     while (currentIndex !== 0) {
@@ -27,6 +21,31 @@ let Game = function(cardsJQ, deckJQ, clickHandler) {
     }
     return array;
     }
+
+
+let Game = function(cardsJQ, deckJQ, clickHandler) {
+
+    this.moves = 0;
+    this.stars = 3;
+    this.cardsJQ = cardsJQ;
+    this.deckJQ = deckJQ;
+    this.deck = new Deck();
+    this.clickHandler = clickHandler;
+
+/*
+   Game.prototype.shuffle = function(array) {
+
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
+    }
+    */
 
 }
 
@@ -41,7 +60,7 @@ Game.prototype.subtractStar = function() {
 Game.prototype.startNewGame = function() {
 
     this.cardsJQ.removeClass().addClass("card");
-    let cardArray = shuffle(cardsJQ.toArray());
+    let cardArray = this.deck.shuffle(cardsJQ.toArray());
     this.deckJQ.empty();
     this.deckJQ.append(cardArray);
     this.cardsJQ.click(clickHandler);
@@ -67,7 +86,6 @@ Game.prototype.startNewGame = function() {
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
- console.log(array);
     while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex -= 1;
