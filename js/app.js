@@ -1,11 +1,6 @@
 /*
  * Create a list that holds all of your cards
  */
- const cardsJQ = $(".card");
- const deckJQ = $(".deck");
- const restartJQ = $(".restart");
- let symbolToMatch = undefined;
- let elementToMatch = undefined;
 
     let Deck = function() {}
 
@@ -23,34 +18,49 @@
     }
 
 
-let Game = function(cardsJQ, deckJQ, clickHandler) {
+let Game = function() {
 
+    this.symbolToMatch = undefined;
+    this.elementToMatch = undefined;
     this.moves = 0;
     this.stars = 3;
-    this.cardsJQ = cardsJQ;
-    this.deckJQ = deckJQ;
+    this.matched = 0;
+    this.cardsJQ = $(".card");
+    this.deckJQ = $(".deck");
     this.deck = new Deck();
-    this.clickHandler = clickHandler;
+    this.movesJQ = $( ".moves" );
+    this.restartJQ = $(".restart");
+    this.starsJQ = $(".stars");
+    this.restartJQ.click(function() {
+        game.startNewGame();
+    });
+    this.buttonJQ = $("button");
+    this.buttonJQ.click(function() {
+        game.buttonHandler();
+    })
+    this.winOverlayJQ = $(".win-overlay");
+    this.winDataJQ = $(".win-data");
+}
 
-/*
-   Game.prototype.shuffle = function(array) {
+Game.prototype.isWon = function() {
+    console.log(this.cardsJQ.length + " " + this.matched);
+    if (this.matched === 2)return true;
+    return (this.matched === this.cardsJQ.length);
+}
 
-    var currentIndex = array.length, temporaryValue, randomIndex;
-    while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-    return array;
-    }
-    */
-
+Game.prototype.showWinOverlay = function() {
+    this.winOverlayJQ.addClass("show");
+    this.deckJQ.addClass("hide");
 }
 
 Game.prototype.addMove = function() {
     this.moves++;
+    this.movesJQ.text(this.moves);
+
+}
+
+Game.prototype.addMatched = function() {
+    this.matched+=2;
 }
 
 Game.prototype.subtractStar = function() {
@@ -60,16 +70,71 @@ Game.prototype.subtractStar = function() {
 Game.prototype.startNewGame = function() {
 
     this.cardsJQ.removeClass().addClass("card");
-    let cardArray = this.deck.shuffle(cardsJQ.toArray());
+    this.cardArray = this.deck.shuffle(this.cardsJQ.toArray());
     this.deckJQ.empty();
-    this.deckJQ.append(cardArray);
-    this.cardsJQ.click(clickHandler);
+    this.deckJQ.append(this.cardArray);
+    this.cardsJQ.click(this.clickHandler);
+    this.matched = 0;
     this.moves = 0;
+    this.movesJQ.text("0");
     this.stars = 3;
+    this.starsJQ.empty();
+}
 
+Game.prototype.buttonHandler = function() {
+    game.startNewGame();
+    game.winOverlayJQ.removeClass("show");
+    game.deckJQ.removeClass("hide");
 }
 
 
+Game.prototype.clickHandler = function() {
+
+    // ignore clicks on green (matched cards) and current blue card
+    if ((this.elementToMatch === this) || $( this ).hasClass("match")) {
+        return;
+    }
+
+    game.addMove();
+    // get symbol of flipped card
+    const symbolElement = $( this ).children("i");
+    const selectedSymbol = $( this ).children("i").attr("class");
+
+    // if this card is first card of matched pair
+    if (game.elementToMatch === undefined) {
+        game.elementToMatch = this;  // initialize
+        game.symbolToMatch = selectedSymbol;
+        $( this ).removeClass().addClass("card turn");
+
+    } else {
+        if (game.symbolToMatch === selectedSymbol) {
+            game.addMatched();
+            $( this ).removeClass().addClass("card turn-distort match");
+            $( game.elementToMatch ).removeClass().addClass("card distort match");
+            if (game.isWon()) {
+                console.log("game is won");
+                game.showWinOverlay();
+                game.winDataJQ.text( `With ${game.moves} Moves and ${game.stars} ${game.stars === 1? "Star": "Stars"}`);
+            }
+
+        } else {  // not a match
+
+            // turn card just clicked on, change to red, tilt, and turn face down
+            if ($( this ).hasClass("turn-tilt-turn1"))
+                $( this ).removeClass().addClass("card turn-tilt-turn2");
+
+            else
+                $( this ).removeClass().addClass("card turn-tilt-turn1");
+
+            // change to red, tilt, and turn face down
+            $( game.elementToMatch ).removeClass().addClass("card tilt-turn")
+        }
+             game.symbolToMatch = undefined;
+             game.elementToMatch = undefined;
+    }
+
+
+}
 
 
 /*
@@ -84,77 +149,14 @@ Game.prototype.startNewGame = function() {
 //function faceDown(cards) {}
 
 // Shuffle function from http://stackoverflow.com/a/2450976
-function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-    while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-
-    return array;
-}
 
 
-function startNewGame() {
-
-    cards.removeClass().addClass("card");
-    let cardArray = shuffle(cards.toArray());
-    deck.empty();
-    deck.append(cardArray);
-    cards.click(clickHandler);
-    this.moves = 0;
-    this.stars = 3;
-}
-
-function clickHandler() {
-
-    // ignore clicks on green (matched cards) and current blue card
-    if ((elementToMatch === this) || $( this ).hasClass("match")) {
-        return;
-    }
-
-
-    // get symbol of flipped card
-    const symbolElement = $( this ).children("i");
-    const selectedSymbol = $( this ).children("i").attr("class");
-
-    // if this card is first card of matched pair
-    if (elementToMatch === undefined) {
-        elementToMatch = this;  // initialize
-        symbolToMatch = selectedSymbol;
-        $( this ).removeClass().addClass("card turn");
-
-    } else {
-        if (symbolToMatch === selectedSymbol) {
-
-             $( this ).removeClass().addClass("card turn-distort match");
-
-             $( elementToMatch ).removeClass().addClass("card distort match");
-        } else {  // not a match
-
-            // turn card just clicked on, change to red, tilt, and turn face down
-            if ($( this ).hasClass("turn-tilt-turn1"))
-                $( this ).removeClass().addClass("card turn-tilt-turn2");
-            else
-                $( this ).removeClass().addClass("card turn-tilt-turn1");
-            // change to red, tilt, and turn face down
-            $( elementToMatch ).removeClass().addClass("card tilt-turn")
-        }
-             symbolToMatch = undefined;
-             elementToMatch = undefined;
-    }
-
-
-}
 
 
 /* restart.click(startNewGame);
 startNewGame(); */
 
-const game = new Game(cardsJQ, deckJQ, clickHandler);
+const game = new Game();
 game.startNewGame();
 
 

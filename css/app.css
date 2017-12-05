@@ -23,36 +23,56 @@ body {
 
 .container {
     display: flex;
-    justify-content: center;
     align-items: center;
     flex-direction: column;
+    width: 100vw;
+    height: 100vh;
 }
 
 h1 {
     font-family: 'Open Sans', sans-serif;
     font-weight: 300;
+    font-size: 1.5em;
+    margin: .5em;
 }
 
 h6 {
     font-family: 'Open Sans', sans-serif;
     font-weight: 75;
-    margin: 5px;
 }
 
 .win-overlay {
-    opacity: 0;
-    position: fixed;
+    position: absolute;
+    top: 0;
+    left: -100vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    top: 0;
-    right: 0;
-    z-index: -1;
     background-color: #fff;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     text-align: center;
+    transition-property: transform;
+
+
 }
+
+
+
+.hide {
+/*    transform: translateX(calc(-100vw));*/
+}
+
+.show {
+    transition-duration: .001s;
+    transition-delay: 2.1s;
+    transform: translateX(calc(100vw));
+}
+
+.hide {
+    z-index: -1;
+}
+
 
 .check-mark {
     color: #8bc34a9c;
@@ -81,49 +101,60 @@ h6 {
  */
 
 .deck {
-    width: 95vw;
+    width: 80vmin;
+    height: 80vmin;
     background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%);
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.5);
+    padding: 0;
+    border-radius: 1vmin;
+    box-shadow: 1.5vmin 2.5vmin 4vmin 0 rgba(46, 61, 73, 0.5);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    margin: 0 0 3em;
+    margin: 2vmin;
+    transition-property: translate;
 }
 
 .deck .card {
-    height: calc((95vw - 70px)/4);
-    width: calc((95vw - 70px)/4);
-    margin: 5px;
+    width: calc((80vmin - 12vmin)/4);
+    height: calc((80vmin - 12vmin)/4);
+    margin: 1.5vmin;
     background: #2e3d49;
     font-size: 0;
     color: #ffffff;
-    border-radius: 8px;
+    border-radius: 1vmin;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 5px 2px 20px 0 rgba(46, 61, 73, 0.5);
+    box-shadow: .3vmin .1vmin .5vmin 0 rgba(46, 61, 73, 0.5);
 }
 
-@media screen and (min-width: 500px) {
-    .deck {
-        padding: 20px;
+.score-panel {
+    width: 80vmin;
+    text-align: left;
+}
+
+@media screen and (max-height: 500px) {
+
+    h1 {
+        font-size: 1.3em;
+        margin-top: .3em;
+        margin-bottom: .3em;
     }
 
-    .deck .card {
-        height: calc((95vw - 120px)/4);
-        width: calc((95vw - 120px)/4);
-        margin: 10px;
+        .score-panel {
+        font-size: .8em;
     }
 }
 
-.turn {
-             animation-name: turn;
-             animation-duration: .5s;
-             animation-fill-mode: forwards;
+@media screen and (max-height: 400px) {
+
+    h1 {
+        font-size: 1.1em;
+        margin-top: .1em;
+        margin-bottom: .1em;
+    }
 }
 
 @keyframes turn {
@@ -132,24 +163,42 @@ h6 {
     100% {transform: rotateY(0deg); background-color:#02b3e4; font-size: 33px;}
 }
 
+.turn {
+    animation-name: turn;
+    animation-duration: .3s;
+    animation-fill-mode: forwards;
+}
+
+.distort {
+    animation-name: distort;
+    animation-duration: .9s;
+    animation-fill-mode: forwards;
+}
 
 .turn-distort {
     animation-name: turn-distort;
-    animation-duration: 2.0s;
+    animation-duration: .9s;
     animation-fill-mode: forwards;
 }
 
 .turn-tilt-turn1 {
     animation-name: turn-tilt-turn1;
-    animation-duration: 2.0s;
+    animation-duration: 1.2s;
     animation-fill-mode: forwards;
 }
 
 .turn-tilt-turn2 {
     animation-name: turn-tilt-turn2;
-    animation-duration: 2.0s;
+    animation-duration: 1.2s;
     animation-fill-mode: forwards;
 }
+
+.tilt-turn {
+    animation-name: tilt-turn;
+    animation-duration: 1.2s;
+    animation-fill-mode: forwards;
+}
+
 
 @keyframes turn-tilt-turn1 {
     0% {transform: rotateY(0deg); background-color: #2e3d49; font-size: 0;}
@@ -179,17 +228,11 @@ h6 {
     100% {transform: rotateY(0deg); background-color: #2e3d49; font-size: 0;}
 }
 
-.tilt-turn {
-    animation-name: tilt-turn;
-    animation-duration: 2.0s;
-    animation-fill-mode: forwards;
-}
-
 
 @keyframes tilt-turn {
     0% {transform: rotateY(0deg); background-color:#02b3e4;font-size: 33px;}
     12.5% {background-color: #02b3e4;}
-    25% {transform: rotateY(0deg); background-color:red; font-size: }
+    25% {transform: rotateY(0deg); background-color:red;}
     64% {transform: rotateY(0deg); transform-origin: initial;}
     66% {transform: rotate(4deg); transform-origin: bottom right;}
     68% {transform: rotate(-4deg); transform-origin: bottom left;}
@@ -201,24 +244,27 @@ h6 {
     100% {transform: rotateY(0deg); background-color: #2e3d49; font-size: 0;}
 }
 
-.distort {
-    animation-name: distort;
-    animation-duration: 2.0s;
-    animation-fill-mode: forwards;
-}
-
-
 @keyframes turn-distort {
     0% {transform: rotateY(0deg); background-color: #2e3d49; font-size: 0;}
     16.67% {transform: rotateY(90deg); background-color: #02b3e4; font-size: 0;}
     33.33% {transform: rotateY(0deg); background-color:#02ccba; font-size: 33px;}
     85% {transform: rotateY(0deg); }
-    87.12% {transform: scale(1.3, .7);}
-    89.24% {transform: scale(.7,1.3);} */
+
+   87.12% {transform: scale(1.3, .7);}
+    89.24% {transform: scale(1.0,1.0);}
+    91.36% {transform: scale(.7,1.3);}
+    93.48% {transform: scale(1.0,1.0);}
+    95.60% {transform: scale(1.2,.8);}
+    97.72% {transform: scale(.8,1.2);}
+
+
+
+/*    87.12% {transform: scale(1.3, .7);}
+    89.24% {transform: scale(.7,1.3);}
     91.36% {transform: scale(1.2,.8);}
     93.48% {transform: scale(.8,1.2);}
-    95.60% {transform: scale(1.1,.9);} */
-    97.72% {transform: scale(.9,1.1);}
+    95.60% {transform: scale(1.1,.9);}
+    97.72% {transform: scale(.9,1.1);} */
     100% {transform: scale(1.0,1.0); background-color:#02ccba; font-size:33px;}
 }
 
@@ -226,13 +272,21 @@ h6 {
     0% {transform: rotateY(0deg); background-color: #02b3e4; font-size: 33px;}
     16.67% {transform: rotateY(0deg); background-color: #02b3e4;}
     33.33% {transform: rotateY(0deg); background-color: #02ccba;}
-    85% {transform: rotateY(0deg); }
-    87.12% {transform: scale(1.3, .7); }
+    85% {transform: rotateY(0deg);}
+
+   87.12% {transform: scale(1.3, .7);}
+    89.24% {transform: scale(1.0,1.0);}
+    91.36% {transform: scale(.7,1.3);}
+    93.48% {transform: scale(1.0,1.0);}
+    95.60% {transform: scale(1.2,.8);}
+    97.72% {transform: scale(.8,1.2);}
+/*
+    87.12% {transform: scale(1.3, .7);}
     89.24% {transform: scale(.7,1.3);}
     91.36% {transform: scale(1.2,.8);}
-    93.48% {transform: scale(.8,1.2); }
-    95.60% {transform: scale(.9,1.1);}
-    97.72% {transform: scale(1.1,.9);}
+    93.48% {transform: scale(.8,1.2);}
+    95.60% {transform: scale(1.1,.9);}
+    97.72% {transform: scale(.9,1.1);} */
     100% {transform: scale(1.0,1.0); background-color:#02ccba; font-size:33px;}
 }
 
@@ -242,13 +296,7 @@ h6 {
  * Styles for the Score Panel
  */
 
-.score-panel {
-    text-align: left;
-    width: 95vw;
-    margin-bottom: 10px;
-    padding-left: 30px;
-    padding-right: 30px;
-}
+
 
 .score-panel .stars {
     padding: 0;
@@ -266,20 +314,5 @@ h6 {
     cursor: pointer;
 }
 
-@media screen and (min-width: 700px) {
-    .score-panel {
-        width: 660px;
-    }
 
-    .deck {
-        width: 660px;
-        min-height: 680px;
-        padding: 32px;
-    }
-
-    .deck .card {
-        height: 125px ;
-        width: 125px;
-    }
-}
 
