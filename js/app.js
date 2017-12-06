@@ -1,172 +1,244 @@
-/*
- * Create a list that holds all of your cards
- */
+let Card = function(cardDOM) {
+    this.cardDOM = cardDOM;
+    this.cardJQ = $( cardDOM );
+    this.iJQ = $( this.cardDOM ).children("i");
+    this.clickCnt = 0;
+    this.status = "not matched";
+    this.fontChar = this.iJQ.attr("class");
+}
 
-    let Deck = function() {}
+Card.prototype.reset = function() {
 
-    Deck.prototype.shuffle = function(array) {
+    this.clickCnt = 0;
+    this.status = "not matched";
+    this.cardJQ.removeClass().addClass("card");
+}
 
-    var currentIndex = array.length, temporaryValue, randomIndex;
+Card.prototype.getFontChar = function() {
+    return this.fontChar;
+}
+
+Card.prototype.setFontChar = function(fontChar) {
+    this.iJQ.removeClass().addClass(fontChar);
+    this.fontChar = fontChar;
+}
+
+Card.prototype.animateMatch = function() {
+    this.status = "matched";
+    this.cardJQ.removeClass().addClass("card distort match");
+}
+
+Card.prototype.animateMatchFail = function() {
+    this.status = "not matched";
+    this.cardJQ.removeClass().addClass("card tilt-turn");
+}
+
+Card.prototype.getClickCnt = function() {
+
+    return this.clickCnt;
+}
+
+Card.prototype.clickHandler = function() {
+    this.clickCnt++;
+
+    if ((this.status === "matched") || (this.status === "open"))
+        return;
+
+    switch(game.getResponse(this)) {
+        case "turn":
+            this.status = "open";
+            this.cardJQ.removeClass().addClass("card turn");
+            break;
+        case "match":
+            this.status = "matched";
+            this.cardJQ.removeClass().addClass("card turn-distort match");
+            break;
+        case "no match":
+            this.status = "not matched";
+            if (this.clickCnt % 2 === 1)
+                this.cardJQ.removeClass().addClass("card turn-tilt-turn1");
+            else
+                this.cardJQ.removeClass().addClass("card turn-tilt-turn2");
+    }
+}
+
+
+let Deck = function() {
+    this.cards = [];
+    this.deckJQ = $(".deck");
+    let cardDOMs = $( ".card" ).toArray();
+    for (let i = 0; i < cardDOMs.length; i++) {
+        this.cards[i] = new Card(cardDOMs[i]);
+        $( this.cards[i].cardDOM ).click(function() {
+           game.deck.cards[i].clickHandler();
+        });
+    }
+}
+
+Deck.prototype.hide = function() {
+
+    this.deckJQ.addClass("hide");
+}
+
+Deck.prototype.show = function() {
+
+    this.deckJQ.removeClass("hide");
+}
+
+Deck.prototype.shuffle = function() {
+
+    let currentIndex = this.cards.length, temporaryValue, randomIndex;
     while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
+        temporaryValue = this.cards[currentIndex].getFontChar();
+        this.cards[currentIndex].setFontChar(this.cards[randomIndex].getFontChar());
+        this.cards[randomIndex].setFontChar(temporaryValue);
     }
-    return array;
-    }
+}
+
+Deck.prototype.newGame = function() {
+
+    this.shuffle();
+    for (let i = 0; i < this.cards.length; i++)
+        this.cards[i].reset();
+}
+
+let WinOverlay = function() {
+
+    this.winOverlayJQ = $(".win-overlay");
+    this.winDataJQ = $(".win-data");
+    $("button").click(function() {
+        game.buttonHandler();
+    });
+
+}
+
+WinOverlay.prototype.buttonHandler = function() {
+    game.startNewGame();
+    this.winOverlayJQ.hide();
+    this.deck.show();
+}
+
+WinOverlay.prototype.show = function() {
+    this.winOverlayJQ.addClass("show");
+    this.winDataJQ.text( `With ${game.moves} Moves and ${game.stars} ${game.stars === 1? "Star": "Stars"}`);
+}
+
+WinOverlay.prototype.hide = function() {
+    this.winOverlayJQ.removeClass("show");
+}
 
 
 let Game = function() {
 
-    this.symbolToMatch = undefined;
-    this.elementToMatch = undefined;
-    this.moves = 0;
-    this.stars = 3;
-    this.matched = 0;
-    this.cardsJQ = $(".card");
-    this.deckJQ = $(".deck");
     this.deck = new Deck();
+    this.deck.shuffle();
+    this.cardToMatch = undefined;
+    this.moves = 0;
     this.movesJQ = $( ".moves" );
-    this.restartJQ = $(".restart");
-    this.starsJQ = $(".stars");
-    this.restartJQ.click(function() {
-        game.startNewGame();
-    });
-    this.buttonJQ = $("button");
-    this.buttonJQ.click(function() {
-        game.buttonHandler();
-    })
-    this.winOverlayJQ = $(".win-overlay");
-    this.winDataJQ = $(".win-data");
+    this.stars = 3;
+    this.starsJQ = $( ".stars" );
+    this.matchCnt = 0;
+    this.winOverlay = new WinOverlay();
+    $(".restart").click(function() {game.startNewGame();});
+}
+
+Game.prototype.buttonHandler = function () {
+        this.startNewGame();
+        this.winOverlay.hide();
+        this.deck.show();
 }
 
 Game.prototype.isWon = function() {
-    console.log(this.cardsJQ.length + " " + this.matched);
-    if (this.matched === 2)return true;
-    return (this.matched === this.cardsJQ.length);
+
+    if (this.matchCnt === 2)return true;
+    return (this.matchCnt === this.cardsJQ.length);
 }
 
-Game.prototype.showWinOverlay = function() {
-    this.winOverlayJQ.addClass("show");
-    this.deckJQ.addClass("hide");
+
+Game.prototype.updateStars = function(clickCnt) {
+
+    if (clickCnt > 2 && this.stars > 0) {
+        this.stars--;
+        this.starsJQ.children("li").first().remove();
+    }
 }
 
-Game.prototype.addMove = function() {
+Game.prototype.resetStars = function() {
+
+    this.stars = 3;
+    this.starsJQ.empty().append(`<li><i class="fa fa-star"></i></li>
+        <li><i class="fa fa-star"></i></li>
+        <li><i class="fa fa-star"></i></li>`);
+}
+
+Game.prototype.updateMoves = function() {
+
     this.moves++;
     this.movesJQ.text(this.moves);
-
 }
 
-Game.prototype.addMatched = function() {
-    this.matched+=2;
+Game.prototype.resetMoves = function() {
+
+    this.moves = 0;
+    this.movesJQ.text(this.moves);
 }
 
-Game.prototype.subtractStar = function() {
-    this.stars--;
+Game.prototype.processMatch = function() {
+
+        this.cardToMatch.animateMatch();
+        this.cardToMatch = undefined;
+        this.matchCnt+=2;
+}
+
+Game.prototype.processWin = function() {
+
+    this.winOverlay.show();
+    this.deck.hide();
+}
+
+Game.prototype.getResponse = function(card) {
+
+
+    this.updateStars(card.getClickCnt());
+    this.updateMoves();
+
+    // there is no card to try to match
+    if (this.cardToMatch === undefined) {
+        this.cardToMatch = card;
+        return "turn";
+    }
+
+    // match
+    if (this.cardToMatch.getFontChar() === card.getFontChar()) {
+        this.processMatch();
+        if (this.isWon())
+            this.processWin();
+        return "match";
+    }
+
+    // no match
+    this.cardToMatch.animateMatchFail();
+    this.cardToMatch = undefined;
+    return "no match";
 }
 
 Game.prototype.startNewGame = function() {
 
-    this.cardsJQ.removeClass().addClass("card");
-    this.cardArray = this.deck.shuffle(this.cardsJQ.toArray());
-    this.deckJQ.empty();
-    this.deckJQ.append(this.cardArray);
-    this.cardsJQ.click(this.clickHandler);
-    this.matched = 0;
-    this.moves = 0;
-    this.movesJQ.text("0");
-    this.stars = 3;
-    this.starsJQ.empty();
-}
-
-Game.prototype.buttonHandler = function() {
-    game.startNewGame();
-    game.winOverlayJQ.removeClass("show");
-    game.deckJQ.removeClass("hide");
-}
-
-
-Game.prototype.clickHandler = function() {
-
-    // ignore clicks on green (matched cards) and current blue card
-    if ((this.elementToMatch === this) || $( this ).hasClass("match")) {
-        return;
-    }
-
-    game.addMove();
-    // get symbol of flipped card
-    const symbolElement = $( this ).children("i");
-    const selectedSymbol = $( this ).children("i").attr("class");
-
-    // if this card is first card of matched pair
-    if (game.elementToMatch === undefined) {
-        game.elementToMatch = this;  // initialize
-        game.symbolToMatch = selectedSymbol;
-        $( this ).removeClass().addClass("card turn");
-
-    } else {
-        if (game.symbolToMatch === selectedSymbol) {
-            game.addMatched();
-            $( this ).removeClass().addClass("card turn-distort match");
-            $( game.elementToMatch ).removeClass().addClass("card distort match");
-            if (game.isWon()) {
-                console.log("game is won");
-                game.showWinOverlay();
-                game.winDataJQ.text( `With ${game.moves} Moves and ${game.stars} ${game.stars === 1? "Star": "Stars"}`);
-            }
-
-        } else {  // not a match
-
-            // turn card just clicked on, change to red, tilt, and turn face down
-            if ($( this ).hasClass("turn-tilt-turn1"))
-                $( this ).removeClass().addClass("card turn-tilt-turn2");
-
-            else
-                $( this ).removeClass().addClass("card turn-tilt-turn1");
-
-            // change to red, tilt, and turn face down
-            $( game.elementToMatch ).removeClass().addClass("card tilt-turn")
-        }
-             game.symbolToMatch = undefined;
-             game.elementToMatch = undefined;
-    }
-
+    this.deck.newGame();
+    this.resetMoves(0);
+    this.resetStars();
+    this.matchCnt = 0;
 
 }
-
-
-/*
- * Display the cards on the page
- *   - shuffle the list of cards using the provided "shuffle" method below
- *   - loop through each card and create its HTML
- *   - add each card's HTML to the page
- */
-
-
-// Modify HTML to place all cards face down
-//function faceDown(cards) {}
-
-// Shuffle function from http://stackoverflow.com/a/2450976
-
-
-
-
-/* restart.click(startNewGame);
-startNewGame(); */
 
 const game = new Game();
 game.startNewGame();
 
 
-/*
- * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
- *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
- */
+
+
+
+
+
