@@ -77,12 +77,12 @@ let Deck = function() {
 
 Deck.prototype.hide = function() {
 
-    this.deckJQ.addClass("hide");
+    this.deckJQ.removeClass("show").addClass("hide");
 }
 
 Deck.prototype.show = function() {
 
-    this.deckJQ.removeClass("hide");
+    this.deckJQ.removeClass("hide").addClass("show");
 }
 
 Deck.prototype.shuffle = function() {
@@ -114,21 +114,14 @@ let WinOverlay = function() {
 
 }
 
-WinOverlay.prototype.buttonHandler = function() {
-    game.startNewGame();
-    this.winOverlayJQ.hide();
-    this.deck.show();
-}
-
 WinOverlay.prototype.show = function() {
-    this.winOverlayJQ.addClass("show");
-    this.winDataJQ.text( `With ${game.moves} Moves and ${game.stars} ${game.stars === 1? "Star": "Stars"}`);
+    this.winOverlayJQ.removeClass("hide").addClass("show");
+    this.winDataJQ.text( `Game won in ${game.elapsedTime.toFixed(1)} seconds with ${game.moves} Moves and ${game.stars} ${game.stars === 1? "Star": "Stars"}`);
 }
 
 WinOverlay.prototype.hide = function() {
-    this.winOverlayJQ.removeClass("show");
+    this.winOverlayJQ.removeClass("show").addClass("hide");
 }
-
 
 let Game = function() {
 
@@ -141,7 +134,28 @@ let Game = function() {
     this.starsJQ = $( ".stars" );
     this.matchCnt = 0;
     this.winOverlay = new WinOverlay();
+    this.timerJQ = $( ".timer" );
+    this.timerFunction = undefined;
+    this.elapsedTime = 0;
+    this.gameStats = [];
+    this.restartJQ = $(".restart");
     $(".restart").click(function() {game.startNewGame();});
+}
+
+Game.prototype.startTimer = function() {
+
+    this.timerFunction = setInterval(function() {
+        game.elapsedTime += .1;
+        game.timerJQ.text(game.elapsedTime.toFixed(1));
+    }, 100);
+}
+
+Game.prototype.resetTimer = function() {
+
+    if (this.timerFunction != undefined)
+        clearInterval(game.timerFunction);
+    this.elapsedTime = 0;
+    this.timerJQ.text("");
 }
 
 Game.prototype.buttonHandler = function () {
@@ -152,8 +166,7 @@ Game.prototype.buttonHandler = function () {
 
 Game.prototype.isWon = function() {
 
-    if (this.matchCnt === 2)return true;
-    return (this.matchCnt === this.cardsJQ.length);
+    return (this.matchCnt === this.deck.cards.length);
 }
 
 
@@ -161,7 +174,8 @@ Game.prototype.updateStars = function(clickCnt) {
 
     if (clickCnt > 2 && this.stars > 0) {
         this.stars--;
-        this.starsJQ.children("li").first().remove();
+        this.starsJQ.children("li").last().remove();
+        this.starsJQ.append('<i class="fa fa-star-o"></i>');
     }
 }
 
@@ -176,13 +190,13 @@ Game.prototype.resetStars = function() {
 Game.prototype.updateMoves = function() {
 
     this.moves++;
-    this.movesJQ.text(this.moves);
+    this.movesJQ.text(this.moves + " Moves");
 }
 
 Game.prototype.resetMoves = function() {
 
     this.moves = 0;
-    this.movesJQ.text(this.moves);
+    this.movesJQ.text(this.moves + " Moves");
 }
 
 Game.prototype.processMatch = function() {
@@ -194,12 +208,18 @@ Game.prototype.processMatch = function() {
 
 Game.prototype.processWin = function() {
 
-    this.winOverlay.show();
-    this.deck.hide();
+    clearInterval(game.timerFunction);
+    this.gameStats.push(this.elapsedTime.toFixed(1));
+    let show = setTimeout(function() {
+        game.winOverlay.show();
+        game.deck.hide();}, 2000);
+
 }
 
 Game.prototype.getResponse = function(card) {
 
+    if (this.moves === 0)
+        this.startTimer();
 
     this.updateStars(card.getClickCnt());
     this.updateMoves();
@@ -226,10 +246,13 @@ Game.prototype.getResponse = function(card) {
 
 Game.prototype.startNewGame = function() {
 
+
     this.deck.newGame();
-    this.resetMoves(0);
+    this.resetMoves();
     this.resetStars();
+    this.resetTimer();
     this.matchCnt = 0;
+
 
 }
 
