@@ -133,7 +133,7 @@ Deck.prototype.show = function() {
 }
 
 /**
-/* @description Shuffles the deck, algorithm from Stack Overflow
+/* @description Shuffles the deck, algorithm from http://stackoverflow.com/a/2450976
 */
 Deck.prototype.shuffle = function() {
 
